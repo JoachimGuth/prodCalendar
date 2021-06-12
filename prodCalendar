@@ -1,1 +1,126 @@
+# prodCalendar Class Definition
+class prodCalendar:
+  # Attributes 
+  daysOfWeek = {'Monday': 1, 'Tuesday':2,'Wednesday': 3, 'Thursday': 4, 'Friday': 5, 'Saturday': 6, 'Sunday': 7}
+  months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct','Nov', 'Dec']
+  monthNbr = [1,2,3,4,5,6,7,8,9,10,11,12]
+  
+  # Daily Default Shift Config: Nbr of Shift, Shift Rooster, Total Hours, Weekday, PH
+  defShiftDay = [3, [8,8,8,0], 24, 1, 0] 
 
+
+  # Initialisation
+  def __init__(self, pname, pyear, pmachineList, pcountry):
+    self.name = pname
+    self.year = pyear
+    self.country = pcountry
+    self.machineList = pmachineList
+    self.monthList = {'Jan': [1, 0], 'Feb': [2,0], 'Mar': [3,0], 'Apr': [4,0], 'May': [5,0], 'Jun': [6,0],'Jul': [7,0], 'Aug': [8,0], 'Sep': [9,0], 'Oct': [10,0], 'Nov': [11,0], 'Dec': [12,0]}  
+    self.Calendar = {machine: {month: {day: [3,[8,8,8,0], 24, datetime(self.year, self.monthNbr[month-1], day).weekday(), self.isPubHoliday(month, day)] for day in range(1,self.nbrOfMonthDays(self.year,month))} for month in self.monthNbr} for machine in self.machineList}
+    
+  # Methods
+  def getCalendar(self):
+    return(self.Calendar)
+
+  def setNoWeekEndShift (self, pmachine, pmonth):
+    for machine in self.Calendar:
+      for month in self.Calendar[machine]:
+        for days in self.Calendar[machine][month]:
+          if machine in pmachine:
+            if month == pmonth:
+              if days in [5,6]:
+                self.Calendar[pmachine][pmonth][days][0] = 0
+                self.Calendar[pmachine][pmonth][days][1] = [0,0,0,0]
+                self.Calendar[pmachine][pmonth][days][2] = 0
+
+
+  #Set the Shift Pattern for the Shift Day
+  def setShiftDay(self, pShiftHoursList):
+    self.defShiftDay [0] = sum([1 for m in pShiftHoursList if m != 0])
+    self.defShiftDay [1] = pShiftHoursList
+    self.defShiftDay [2] = sum([pShiftHoursList[k] for k in range(len(pShiftHoursList))])
+      
+  # Returns the currently set Shift Day Pattern   
+  def getDefShiftDay(self):
+    return(self.defShiftDay)
+  
+  def setShiftDayMonth(self, pShiftHoursList, pmachine, pmonth): 
+    for machine in self.Calendar:
+        for month in self.Calendar[machine]:
+          for days in self.Calendar[machine][month]:
+              if machine in pmachine:
+                if month == pmonth:
+                  self.Calendar[pmachine][pmonth][days][0] = sum([1 for m in pShiftHoursList if m != 0])
+                  self.Calendar[pmachine][pmonth][days][1] = pShiftHoursList
+                  self.Calendar[pmachine][pmonth][days][2] = sum([pShiftHoursList[k] for k in range(len(pShiftHoursList))])
+
+  def getShift(self, pmachine, pmonth):
+    pass
+
+  def getShiftHours(self, pmachine, pmonth):
+    pass
+
+  def printCalendar(self, machineList):
+    print(self.prodCalendar)
+
+  def getHoursPerMachineMonth(self, pmachine, pmonth):
+    s = []
+    for ma in pmachine:
+      for mo in pmonth:
+        a = [self.Calendar[ma][mo][da][2] for da in self.Calendar[ma][mo]]
+        s.append(a)
+    print(s)
+    t = sum(s)
+    return(t)
+
+
+
+
+  def daysOfWeek(self):
+    dof = [self.dictDaysOfWeek[d] for d in self.dictDaysOfWeek]
+    return(dof)
+
+  def isPubHoliday(self, pmonth, pday):
+    for d in holidays.Singapore(years=self.year).items():
+      # print(d[0].day,d[0].month,pday, pmonth)
+      if d[0].month == pmonth and d[0].day == pday:
+         return(1)
+    return(0)
+  
+  def getPubHolidays(self):
+    t = [(m[0].day,m[0].month) for m in holidays.Singapore(years = 2021).items()]
+    t.sort(key = lambda x:x[1])
+    #for i in range(len(t)):
+      #retd[i] = t[i][0]
+      #retd[i] = t[i][1]
+      #print(t[i][0], t[i][1])
+    return (t)
+
+  # Sets the all public holidays in self.calendar according to self.year and self.country
+  def setPubHolidays(self):
+    for machine in self.Calendar:
+      for month in self.Calendar[machine]:
+        for day in self.Calendar[machine][month]:
+          #print(machine, month, day)
+          if self.monthList[month][0] == self.getPubHolidays()[1][monthList[month][0]]:
+            if self.Calendar[machine][month][day] == self.getPubHolidays()[0][day]:
+              self.Calendar[machine][month[day][4]] = 1
+                   
+  # Nbr of Days of a month in a particulat year
+  def nbrOfMonthDays(self, year, month):
+    leap = 0
+    if year % 400 == 0:
+        leap = 1
+    elif year % 100 == 0:
+        leap = 0
+    elif year % 4 == 0:
+        leap = 1
+    if month == 2: #Feb
+        return 28 + leap
+    #list = ['Jan','Mar','May','Jul','Aug','Oct','Dec']
+    list = [1, 3, 5, 7, 8 , 10, 12]
+    if month in list:
+        return 31
+    return 30
+    
+ # End
